@@ -1,0 +1,19 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.keys import Keys
+import time
+
+
+
+driver = webdriver.Chrome(r"C:\Users\Boys\Documents\chromedriver")
+
+driver.get("https://accounts.google.com/signin/v2/identifier?service=mail&passive=true&rm=false&continue=https%3A%2F%2Fmail.google.com%2Fmail%2F&ss=1&scc=1&ltmpl=default&ltmplcache=2&emr=1&osid=1&flowName=GlifWebSignIn&flowEntry=ServiceLogin")
+username = driver.find_element_by_xpath('//*[@id="identifierId"]')
+username.send_keys('EMAIL')
+username.send_keys(Keys.ENTER)
+time.sleep(1)
+password = driver.find_element_by_xpath('//*[@id="password"]/div[1]/div/div[1]/input')
+password.send_keys('PASSWORD')
+password.send_keys(Keys.ENTER)
