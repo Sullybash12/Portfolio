@@ -1,0 +1,56 @@
+import random
+import math
+
+word1 = "head"
+word2 = "nomenclature"
+word3 = "dishwasher"
+word4 = "pack"
+word5 = "epiphany"
+words = [word1,word2,word3,word4,word5]
+rand = random.choice(words)
+length = len(rand)
+guessed_letters = []
+lives = 10
+blank = " "
+
+while True:
+    if lives == 0:
+        print("Sorry, you lost")
+        break
+    elif lives > 0:
+        print("_ " * length)
+        inp1 = str.lower(input("Enter a letter: "))
+        try:
+            val = int(inp1)
+            inp1int = True
+        except ValueError:
+            inp1int = False
+        if inp1 == "":
+            print("Please enter a letter")
+        elif inp1 in rand:
+            if inp1 == rand:
+                print("Success, you have guessed the word!")
+                break
+            elif inp1 in rand:
+                print("Success! You have guessed a letter")
+                guessed_letters.append(inp1)
+                print(guessed_letters)
+                for c in rand:
+                  blank = blank + "_ "
+                  lblank = len(blank)
+                  """print("_" + c, end = "")"""
+                  if c in guessed_letters:
+                    print(c, end = "")
+                  else:
+                    print("_", end = "")
+                #print(blank.replace("_", str(inp1)))
+        elif inp1 not in rand:
+            if inp1int == True:
+                print("Please only enter letters!")
+            else:
+                lives = lives - 1
+                if len(inp1) == 1:
+                    print("Sorry, you guessed a wrong letter.")
+                elif len(inp1) > 1:
+                    print("Sorry, you guessed the wrong word.")
+                print("You lost a life. You have " + str(lives) + " lives left.")
