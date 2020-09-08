@@ -1,0 +1,148 @@
+import json
+import time
+import os
+from typing import List
+
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.select import Select
+from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.keys import Keys
+import requests
+
+name = input("Value to put for name: ").strip()
+email = input("Value to put for both email and confirmation email: ").strip()
+print("""For the following input, to make inputting easier, please refer to the following:
+1: Currency and Marketplace
+2: Delete Account
+3: Gameplay Questions
+4: General Questions
+5: Realms Issues
+6: Refund Request
+7: Report Brand Violations
+8: Sign-in issue
+""")
+issue = int(input("What would you like the issue to be? (Respond with the number corresponding: ").strip())
+issuetextinp = input("What would you like to input as the issue? ")
+timesrun = int(input("How many times would you like it to run? ").strip().lower())
+ifheadless = input("Would you like it headless? (y or n): ").strip().lower()
+
+
+def sendCaptcha():
+    data = {
+        'key': 'APIKEY',  # Insert 2Captcha API Key Here.
+        'method': 'userrecaptcha',
+        'googlekey': '6Ldm2WgUAAAAAJ0tKm0JAq-vewBfYR2yhQmPknA2',
+        'pageurl': 'https://help.minecraft.net/hc/en-us/requests/new',
+        'invisible': 0,
+        'json': 1,
+        'min_score': 0.2
+    }
+    try:
+        sc = requests.post('https://2captcha.com/in.php', data=data)
+        j = json.loads(sc.text)
+    except:
+        return 1
+    if j['status'] == 1:
+        return j['request']
+    return 1
+
+
+def getCaptcha(cid):
+    try:
+        gc = requests.get(
+            'https://2captcha.com/res.php?key={0}&action=get&id={1}&json=1'.format('0e7594fa9ee2ee7ab5eec186c5d888a2',
+                                                                                   cid))
+
+        j = json.loads(gc.text)
+    except:
+        return 2
+    if j['status'] == 1:
+        return j['request']
+    elif j['status'] == 0:
+        if j['request'] == 'CAPTCHA_NOT_READY':
+            return 1
+        elif j['request'] == 'ERROR_CAPTCHA_UNSOLVABLE':
+            return 3
+        else:
+            print(j)
+            return 3
+    return 2
+
+
+chrome_options = Options()
+proxy = input("What proxy would you like to use? ")
+# chrome_options.add_argument('--proxy-server=%s' % proxy)
+
+if ifheadless == "y":
+    chrome_options.add_argument("--headless")
+else:
+    pass
+
+chrome_driver = os.getcwd() + "\chromedriver.exe"
+driver = webdriver.Chrome(r"C:\Users\Sebastian\Desktop\going_headless\chromedriver.exe", chrome_options=chrome_options)
+for timerun in range(0, timesrun):
+    driver.get("https://help.minecraft.net/hc/en-us/requests/new")
+
+    namexpath = driver.find_element_by_xpath('//*[@id="request_custom_fields_360021223711"]')
+    namexpath.send_keys(name)
+
+    email1xpath = driver.find_element_by_xpath('//*[@id="request_custom_fields_360021175632"]')
+    email1xpath.send_keys(email)
+    email2xpath = driver.find_element_by_xpath('//*[@id="request_custom_fields_360021223731"]')
+    email2xpath.send_keys(email)
+
+    # issuetext('//*[@id="request_description"]')
+
+    versionbutton1 = driver.find_elements_by_xpath('//*[@id="new_request"]/div[7]/a')[0]
+    versionbutton1.click()
+    versionbutton2 = driver.find_element_by_xpath('//*[@id="__dc.minecraft_java_edition__"]')
+    versionbutton2.click()
+
+    if issue == 1:
+        issuex = '//*[@id="currency___marketplace"]'
+    elif issue == 2:
+        issuex = '//*[@id="delete_account"]'
+    elif issue == 3:
+        issuex = '//*[@id="___dc.game_play_questions__"]'
+    elif issue == 4:
+        issuex = '//*[@id="general_questions"]'
+    elif issue == 5:
+        issuex = '//*[@id="realms_issues"]'
+    elif issue == 6:
+        issuex = '//*[@id="refund_request"]'
+    elif issue == 7:
+        issuex = '//*[@id="report_brand_violations"]'
+    elif issue == 8:
+        issuex = '//*[@id="sign-in_issue"]'
+
+    issuebutton1 = driver.find_element_by_xpath('//*[@id="new_request"]/div[10]/a')
+    issuebutton1.click()
+    issuebutton2 = driver.find_element_by_xpath(issuex)
+    issuebutton2.click()
+
+    issuetext = driver.find_element_by_xpath('//*[@id="request_description"]')
+    issuetext.send_keys(issuetextinp)
+
+    a = True
+    time.sleep(2)
+    idid = sendCaptcha()
+    time.sleep(20)
+    while a:
+        get = getCaptcha(idid)
+        time.sleep(5)
+        print(get)
+        if get != 3:
+            a = False
+            respxp = r'//*[@id="g-recaptcha-response"]'
+            getstr = str(get)
+            my = 'document.getElementById("g-recaptcha-response").innerHTML = \"' + getstr + '\";'
+            driver.execute_script(my)
+            time.sleep(3)
+
+    time.sleep(6)
+    submit = driver.find_element_by_xpath('//*[@id="new_request"]/footer/input')
+    submit.click()
