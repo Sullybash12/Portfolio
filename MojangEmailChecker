@@ -1,0 +1,177 @@
+import os
+import json
+from time import sleep
+import math
+
+import multiprocessing
+from multiprocessing.pool import ThreadPool
+from joblib import Parallel, delayed
+
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.select import Select
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver import ActionChains
+import requests
+
+
+options = Options()
+options.addArguments("start-maximized")
+options.addArguments("enable-automation")
+options.addArguments("--headless")
+options.addArguments("--no-sandbox")
+options.addArguments("--disable-infobars")
+options.addArguments("--disable-dev-shm-usage")
+options.addArguments("--disable-browser-side-navigation")
+options.addArguments("--disable-gpu")
+# options.add_argument("--headless")
+# proxy = "megaproxy.rotating.proxyrack.net:10000"
+# options.add_argument('--proxy-server=%s' % proxy)  # Uncomment and add proxy if you would like to run on a proxy.
+
+
+
+def sendCaptcha():
+    data = {
+        'key': 'APIKEY',  # Input your 2Captcha API key)
+        'method': 'userrecaptcha',
+        'googlekey': '6LfbsiMUAAAAAOu1nGK8InBaFrIk17dcbI0sqvzj',
+        'pageurl': 'https://checkout.minecraft.net/en-us/store/minecraft/#register',
+        'invisible': 1,
+        'json': 1,
+        'min_score': 0.2
+    }
+    try:
+        sc = requests.post('https://2captcha.com/in.php', data=data)
+        j = json.loads(sc.text)
+    except:
+        return 1
+    if j['status'] == 1:
+        return j['request']
+    return 1
+
+
+def getCaptcha(cid):
+    try:
+        gc = requests.get(
+            'https://2captcha.com/res.php?key={0}&action=get&id={1}&json=1'.format('0e7594fa9ee2ee7ab5eec186c5d888a2',
+                                                                                   cid))
+
+        j = json.loads(gc.text)
+    except:
+        return 2
+    if j['status'] == 1:
+        return j['request']
+    elif j['status'] == 0:
+        if j['request'] == 'CAPTCHA_NOT_READY':
+            return 1
+        elif j['request'] == 'ERROR_CAPTCHA_UNSOLVABLE':
+            return 3
+        else:
+            print(j)
+            return 3
+    return 2
+
+
+def mainf(email):
+    unloaded = True
+    chrome_driver = os.getcwd() + "\chromedriver.exe"
+    driver = webdriver.Chrome(r"C:\Users\Sebastian\Desktop\going_headless\chromedriver.exe",
+                              chrome_options=chrome_options)
+    driver.get('https://checkout.minecraft.net/en-us/store/minecraft/#register')
+    while unloaded:
+        try:
+            email_input = driver.find_element_by_css_selector("input[name='email']")
+            email_input.send_keys(email)
+            unloaded = False
+        except:
+            pass
+    repeatEmail_input = driver.find_element_by_css_selector("input[name='repeatEmail']")
+    repeatEmail_input.send_keys(email)
+
+    password_input = driver.find_element_by_css_selector("input[name='password']")
+    password_input.send_keys("minecraft123")
+
+    s2 = Select(driver.find_element_by_name('day'))
+    s2.select_by_value('19')
+
+    s3 = Select(driver.find_element_by_name('month'))
+    s3.select_by_value('5')
+
+    s4 = Select(driver.find_element_by_name('year'))
+    s4.select_by_value('1999')
+
+    login_link = driver.find_element_by_xpath('//*[@id="orderflow"]/div[2]/div/div/form/div[6]/button')
+    login_link.click()
+
+    a = True
+    idid = sendCaptcha()
+    sleep(20)
+    while a:
+        get = getCaptcha(idid)
+        sleep(5)
+        print(get)
+        if get != 3:
+            a = False
+            respxp = r'//*[@id="g-recaptcha-response"]'
+            getstr = str(get)
+            my = 'document.getElementById("g-recaptcha-response").innerHTML = \"' + getstr + '\";'
+            driver.execute_script(my)
+            sleep(2)
+            element1 = driver.find_element_by_xpath('//*[@id="master-head"]')
+            ActionChains(driver).click(element1).perform()
+            sleep(1)
+            login_link.click()
+    errorunloaded = True
+    while errorunloaded:
+        try:
+            showerror = driver.find_element_by_xpath('//*[@id="modal-dialog"]/div/div/div/div[2]/p[2]/a')
+            showerror.click()
+            errorunloaded = False
+        except:
+            sleep(1)
+    text_unloaded = False
+    while text_unloaded:
+        try:
+            text = driver.find_element_by_xpath('//*[@id="modal-dialog"]/div/div/div/div[2]/div/p').text.lower()
+            text_unloaded = False
+        except:
+            pass
+    textspl = text.split()
+    print(textspl)
+    driver.quit()
+    if email in textspl:
+        print(email + " has already been registered!")
+        registered.append(email)
+        regf = open("regf.txt", "a")
+        regf.write(email + "\n")
+        regf.close()
+    elif "undeliverable" in textspl:
+        print(email + " is an undeliverable email address")
+        undeliverable.append(email)
+        undelf = open("undelf.txt", "a")
+        undelf.write(email + "\n")
+        undelf.close()
+    else:
+        print("Other or not registered")
+        other.append(email)
+        otherf = open("otherf.txt", "a")
+        otherf.write(email + "\n")
+        otherf.close()
+
+
+list = input("Paste in your list, with a space in between each email: ")
+tinp = int(input("How many emails per instance would you like to run? ").strip())
+registered = []
+undeliverable = []
+other = []
+listspl = list.split()
+listleng = len(listspl)
+threads = int(math.ceil(int(listleng) / tinp))
+for email in listspl:
+    foo = ThreadPool(threads).imap_unordered(mainf(email), list)
+    for thing in foo:
+        print("Hi")
+
+
+
+
