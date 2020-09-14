@@ -1,0 +1,65 @@
+import os
+import json
+import time
+import math
+
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.select import Select
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver import ActionChains
+import requests
+
+
+
+
+chrome_driver = os.getcwd() + "\chromedriver.exe"
+driver = webdriver.Chrome(r"C:\Users\Sebastian\Desktop\chromedriver.exe")
+
+driver.get("https://www.newegg.com")
+time.sleep(3)
+try:
+    driver.find_element_by_xpath('//*[@id="popup-close"]').click()
+    time.sleep(1)
+except:
+    pass
+
+
+loginbut = driver.find_element_by_xpath('/html/body/header/div[1]/div[4]/div[1]/div[1]/a/div[2]').click()
+time.sleep(3)
+
+email = driver.find_element_by_xpath('//*[@id="labeled-input-signEmail"]')
+email.send_keys('Sullybash1234@gmail.com')
+driver.find_element_by_xpath('//*[@id="app"]/div/div[2]/div/div/div[1]/form/div/div[2]/button').click()
+time.sleep(1)
+password = driver.find_element_by_xpath('//*[@id="labeled-input-password"]')
+password.send_keys("KKay1-2.")
+driver.find_element_by_xpath('//*[@id="app"]/div/div[2]/div/div/div[2]/form/div/div[3]/button').click()
+time.sleep(1)
+
+driver.get('https://www.newegg.com/msi-geforce-rtx-2080-super-rtx-2080-super-gaming-x-trio/p/N82E16814137442?Description=2080&cm_re=2080-_-14-137-442-_-Product')
+time.sleep(1)
+driver.find_element_by_xpath('//*[@id="landingpage-cart"]/div/div[2]/button').click()
+time.sleep(1)
+try:
+    driver.find_element_by_xpath('//*[@id="custom"]/div/div[3]/div/div/div/button[1]').click()
+except:
+    pass
+time.sleep(3)
+
+driver.get('https://secure.m.newegg.com/shopping/cart')
+time.sleep(2)
+driver.find_element_by_xpath('//*[@id="framework7_page_current"]/div/div[4]/p/a').click()
+time.sleep(1)
+email = driver.find_element_by_xpath('//*[@id="labeled-input-signEmail"]')
+email.send_keys('Sullybash1234@gmail.com')
+driver.find_element_by_xpath('//*[@id="app"]/div/div[2]/div/div/div[1]/form/div/div[2]/button').click()
+time.sleep(1)
+password = driver.find_element_by_xpath('//*[@id="labeled-input-password"]')
+password.send_keys("KKay1-2.")
+driver.find_element_by_xpath('//*[@id="app"]/div/div[2]/div/div/div[2]/form/div/div[3]/button').click()
+time.sleep(1)
+
+driver.find_element_by_xpath('//*[@id="framework7_page_current"]/div/div[7]/div/div[2]/div/button').click()
+time.sleep(3)
+pemail = driver.find_element_by_xpath('//*[@id="email"]')
